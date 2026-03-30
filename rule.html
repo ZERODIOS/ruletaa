@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clash Royale · Ruleta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ================================================================
+   IMÁGENES CLASH ROYALE — CLASES DEDICADAS
+   Para actualizar cualquier imagen, cambia solo la URL de su clase.
+================================================================ */
+.img--logo {
+  /* Logo oficial Clash Royale — header navbar */
+  background-image: url('https://upload.wikimedia.org/wikipedia/en/thumb/1/1f/Clash_Royale_Logo.png/320px-Clash_Royale_Logo.png');
+}
+.img--card-mystery {
+  /* Carta misteriosa / wild card */
+  background-image: url('https://static.wikia.nocookie.net/clashroyale/images/6/6a/Wild_Card.png');
+}
+.img--trophy {
+  /* Trofeo Clash Royale */
+  background-image: url('https://i.pinimg.com/1200x/a7/c3/69/a7c36976abdacff98177b22f5570eadf.jpg');
+}
+.img--gem {
+  /* Gema azul */
+  background-image: url('https://static.wikia.nocookie.net/clashroyale/images/d/d3/Gem.png');
+}
+.img--crown-icon {
+  /* Corona pequeña amarilla */
+  background-image: url('https://static.wikia.nocookie.net/clashroyale/images/e/e9/Crown.png');
+}
+.img--deco-left {
+  /* Decoración suelo izquierdo (casco azul) */
+  background-image: url('https://static.wikia.nocookie.net/clashroyale/images/f/f7/Knight.png');
+}
+.img--deco-right {
+  /* Decoración suelo derecho (cañón) */
+  background-image: url('https://i.pinimg.com/1200x/a7/c3/69/a7c36976abdacff98177b22f5570eadf.jpg');
+}
+
+/* ================================================================
+   RESET & BASE
+================================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-blue:       #1c56b4;
+  --bg-dark:       #0d3278;
+  --nav-bg:        #0c2358;
+  --panel-bg:      #0b4a2e;
+  --panel-mid:     #0d5c38;
+  --panel-border:  rgba(255,255,255,0.12);
+  --gold:          #ffd700;
+  --gold-d:        #c49000;
+  --gold-shine:    #fff59d;
+  --green-btn:     #4caf1f;
+  --green-dark:    #2a7200;
+  --blue-btn:      #1e6fd4;
+  --blue-dark:     #0d3c80;
+  --wood:          #c27d18;
+  --wood-dark:     #7a4b05;
+  --wood-light:    #e89c30;
+  --white:         #ffffff;
+  --text-sub:      rgba(255,255,255,0.68);
+}
+
+html, body { width:100%; min-height:100vh; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-blue);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* BG: gradiente + patrón coronas */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 0%,   rgba(40,120,220,0.55) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(8, 28, 90,0.65)  0%, transparent 55%),
+    linear-gradient(180deg, var(--bg-blue) 0%, var(--bg-dark) 100%);
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 12 L29 32 L14 20 L20 46 L60 46 L66 20 L51 32 Z M23 48 L57 48 L54 56 L26 56 Z' fill='white'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+/* ================================================================
+   NAVBAR
+================================================================ */
+.navbar {
+  position: relative; z-index: 100;
+  background: var(--nav-bg);
+  height: 62px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 22px;
+  border-bottom: 2px solid rgba(255,255,255,0.07);
+  box-shadow: 0 3px 18px rgba(0,0,0,0.55);
+}
+.nav-logo-img {
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+.nav-logo-text {
+  font-family: 'Lilita One', cursive;
+  font-size: 1.4rem;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 #000;
+  display: none;
+}
+.nav-icons { display: flex; gap: 10px; }
+.nav-btn {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.09);
+  border: 1.5px solid rgba(255,255,255,0.14);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; color: #fff;
+  transition: background 0.2s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* Banner "descubre el store" */
+.nav-bar-strip {
+  position: relative; z-index: 99;
+  background: #08224e;
+  text-align: center;
+  padding: 7px 16px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.06em;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.strip-pill {
+  background: rgba(255,255,255,0.11);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+/* ================================================================
+   STAGE (área central)
+================================================================ */
+.stage {
+  position: relative; z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 12px 0;
+}
+
+/* ================================================================
+   PANEL VERDE (idéntico al de "¡Regalo diario!")
+================================================================ */
+.panel {
+  width: min(850px, 96vw);
+  background: var(--panel-bg);
+  border-radius: 20px;
+  border: 2.5px solid var(--panel-border);
+  box-shadow:
+    0 0 0 1.5px rgba(0,0,0,0.7),
+    0 20px 60px rgba(0,0,0,0.75),
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
+  position: relative; overflow: hidden;
+  padding: 32px 36px 36px;
+}
+/* Iluminación interna panel */
+.panel::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 65% 25%, rgba(20,130,70,0.45) 0%, transparent 55%),
+    radial-gradient(ellipse at 10% 80%, rgba(5, 60,28,0.55)  0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+/* Patrón rombos verdes */
+.panel::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: 18px;
+  opacity: 0.045; pointer-events: none; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect x='0' y='0' width='18' height='18' fill='white'/%3E%3Crect x='18' y='18' width='18' height='18' fill='white'/%3E%3C/svg%3E");
+  background-size: 18px 18px;
+}
+
+.panel-inner {
+  position: relative; z-index: 2;
+  display: flex; gap: 28px; align-items: center;
+}
+@media (max-width: 620px) {
+  .panel-inner { flex-direction: column; gap: 22px; }
+  .panel { padding: 22px 16px 28px; }
+}
+
+/* ---- Columna izquierda ---- */
+.col-left {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 13px;
+  min-width: 0;
+}
+/* ---- Columna derecha: ruleta ---- */
+.col-right {
+  flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+
+/* ================================================================
+   TIMER BADGE
+================================================================ */
+.timer-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(0,0,0,0.5);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 40px;
+  padding: 5px 15px;
+  font-size: 0.8rem; font-weight: 800; color: #fff;
+  width: fit-content;
+}
+.timer-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
+
+/* ================================================================
+   TÍTULOS
+================================================================ */
+.panel-title {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(1.9rem, 4.5vw, 2.9rem);
+  color: var(--white);
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.55), 0 0 20px rgba(255,255,255,0.08);
+  line-height: 1.1;
+}
+.panel-sub {
+  color: var(--text-sub);
+  font-size: 0.88rem; font-weight: 700; line-height: 1.55;
+}
+
+/* ================================================================
+   INPUTS
+================================================================ */
+.inputs-wrap { display: flex; flex-direction: column; gap: 7px; }
+.input-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.in-num {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(0,0,0,0.4); border: 1.5px solid rgba(255,255,255,0.18);
+  font-size: 0.72rem; font-weight: 900; color: rgba(255,255,255,0.65);
+  display: flex; align-items: center; justify-content: center;
+}
+.input-row.vip .in-num {
+  background: var(--gold-d); border-color: var(--gold); color: #1a0f00;
+}
+.cr-input {
+  flex: 1;
+  background: rgba(0,0,0,0.38);
+  border: 2px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  padding: 9px 13px;
+  color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem; font-weight: 700;
+  outline: none; transition: border-color 0.2s, background 0.2s;
+}
+.cr-input::placeholder { color: rgba(255,255,255,0.28); font-weight: 600; }
+.cr-input:focus {
+  border-color: rgba(255,215,0,0.55);
+  background: rgba(0,0,0,0.52);
+}
+.input-row.vip .cr-input { border-color: rgba(255,215,0,0.4); }
+.vip-icon { font-size: 1.05rem; flex-shrink: 0; }
+.hint-row {
+  font-size: 0.7rem; font-weight: 800; font-style: italic;
+  color: rgba(255,215,0,0.6); padding-left: 32px; letter-spacing: 0.03em;
+}
+
+/* ================================================================
+   BOTONES CLASH ROYALE
+================================================================ */
+.btn-cr {
+  font-family: 'Lilita One', cursive;
+  border: none; border-radius: 12px; cursor: pointer;
+  letter-spacing: 0.04em; outline: none; user-select: none;
+  position: relative; overflow: hidden;
+  transition: transform 0.12s, filter 0.12s;
+  text-shadow: 1px 2px 0 rgba(0,0,0,0.45);
+}
+/* Brillo superior tipo plastilina */
+.btn-cr::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 42%;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px 10px 50% 50%;
+  pointer-events: none;
+}
+.btn-cr:hover  { transform: translateY(-2px); filter: brightness(1.1); }
+.btn-cr:active { transform: translateY(1px);  filter: brightness(0.93); }
+.btn-cr:disabled { opacity: 0.42; cursor: not-allowed; transform: none !important; filter: none !important; }
+
+.btn-green {
+  background: linear-gradient(180deg, #5ec81f 0%, var(--green-dark) 100%);
+  box-shadow: 0 5px 0 #1a5200, 0 8px 18px rgba(0,0,0,0.45);
+  border-bottom: 3px solid #1a5200;
+  color: #fff; padding: 13px 36px; font-size: 1.1rem;
+}
+.btn-blue {
+  background: linear-gradient(180deg, #3b8fe8 0%, var(--blue-dark) 100%);
+  box-shadow: 0 4px 0 #082870, 0 6px 14px rgba(0,0,0,0.4);
+  border-bottom: 3px solid #082870;
+  color: #fff; padding: 10px 20px; font-size: 0.88rem;
+}
+.btn-gold {
+  background: linear-gradient(180deg, #ffe040 0%, var(--gold-d) 100%);
+  box-shadow: 0 4px 0 #7a5500, 0 6px 14px rgba(0,0,0,0.4);
+  border-bottom: 3px solid #7a5500;
+  color: #3d1e00; padding: 10px 20px; font-size: 0.88rem;
+}
+
+.btn-row { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+
+/* Status */
+.status-msg {
+  font-size: 0.8rem; font-weight: 800;
+  color: rgba(255,215,0,0.75);
+  letter-spacing: 0.05em; min-height: 18px;
+}
+
+/* Chips */
+.chips-area {
+  display: flex; flex-wrap: wrap; gap: 7px;
+}
+.chip {
+  background: rgba(0,0,0,0.38);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  border-radius: 30px; padding: 4px 13px;
+  font-size: 0.76rem; font-weight: 800;
+  color: rgba(255,255,255,0.8);
+  display: flex; align-items: center; gap: 5px;
+}
+.chip.vip-chip {
+  background: linear-gradient(135deg, var(--gold-d), var(--gold));
+  border-color: var(--gold); color: #2a1000;
+  animation: chipGlow 1.6s ease-in-out infinite;
+}
+@keyframes chipGlow {
+  0%,100%{ box-shadow: 0 0 0 0 rgba(255,215,0,0); }
+  50%    { box-shadow: 0 0 0 5px rgba(255,215,0,0.22); }
+}
+
+/* ================================================================
+   RULETA
+================================================================ */
+.wheel-wrap { position: relative; }
+
+/* Aro exterior dorado */
+.wheel-ring {
+  position: relative;
+  width: 280px; height: 280px;
+}
+.wheel-ring::before {
+  content: '';
+  position: absolute; inset: -11px; border-radius: 50%; z-index: 0;
+  background: conic-gradient(
+    #b8860b 0deg,#ffd700 25deg,#fff59d 35deg,#ffd700 45deg,
+    #b8860b 70deg,#ffd700 95deg,#fff59d 105deg,#ffd700 115deg,
+    #b8860b 140deg,#ffd700 165deg,#fff59d 175deg,#ffd700 185deg,
+    #b8860b 210deg,#ffd700 235deg,#fff59d 245deg,#ffd700 255deg,
+    #b8860b 280deg,#ffd700 305deg,#fff59d 315deg,#ffd700 325deg,
+    #b8860b 350deg,#ffd700 360deg
+  );
+  box-shadow: 0 0 28px rgba(255,215,0,0.38), 0 8px 28px rgba(0,0,0,0.6);
+}
+.wheel-ring::after {
+  content: '';
+  position: absolute; inset: -5px; border-radius: 50%; z-index: 1;
+  background: rgba(0,0,0,0.42);
+}
+
+#wheelCanvas {
+  position: relative; z-index: 2;
+  border-radius: 50%; display: block;
+  width: 280px; height: 280px;
+}
+
+/* Flecha */
+.wheel-arrow {
+  position: absolute; top: -4px;
+  left: 50%; transform: translateX(-50%);
+  z-index: 10;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.85));
+}
+
+/* Centro */
+.wheel-center {
+  position: absolute; z-index: 9;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 56px; height: 56px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 33%, #fff 0%, var(--gold) 45%, var(--gold-d) 100%);
+  border: 3px solid rgba(0,0,0,0.45);
+  box-shadow: 0 0 0 2.5px var(--gold-d), 0 4px 14px rgba(0,0,0,0.65);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; cursor: pointer;
+  transition: transform 0.15s;
+}
+.wheel-center:hover { transform: translate(-50%,-50%) scale(1.12); }
+
+/* Etiqueta bajo ruleta */
+.wheel-lbl {
+  font-size: 0.78rem; font-weight: 800;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  text-align: center; margin-top: 8px;
+}
+
+/* ================================================================
+   SUELO DE MADERA
+================================================================ */
+.wood-floor {
+  position: relative; z-index: 2;
+  width: 100%;
+  height: 84px;
+  margin-top: auto;
+  background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 35%, var(--wood-dark) 100%);
+  border-top: 4px solid rgba(255,255,255,0.22);
+  box-shadow: inset 0 4px 8px rgba(255,255,255,0.12), inset 0 -4px 10px rgba(0,0,0,0.45);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 0 6%; overflow: hidden;
+}
+.wood-floor::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    90deg, transparent, transparent 50px,
+    rgba(0,0,0,0.07) 50px, rgba(0,0,0,0.07) 52px
+  );
+}
+.deco {
+  font-size: 3.6rem;
+  line-height: 1; padding-top: 3px;
+  filter: drop-shadow(2px -2px 4px rgba(0,0,0,0.55));
+  position: relative; z-index: 1;
+}
+
+/* ================================================================
+   MODAL GANADOR
+================================================================ */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(6px);
+  z-index: 500;
+  align-items: center; justify-content: center;
+}
+.modal-bg.open { display: flex; }
+
+.modal-card {
+  background: var(--panel-bg);
+  border: 3px solid var(--gold);
+  border-radius: 22px; padding: 44px 38px 36px;
+  max-width: 410px; width: 90%;
+  text-align: center; position: relative; overflow: hidden;
+  box-shadow: 0 0 0 6px rgba(255,215,0,0.14), 0 28px 80px rgba(0,0,0,0.9);
+  animation: pop 0.35s cubic-bezier(.175,.885,.32,1.275);
+}
+.modal-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(30,130,70,0.4), transparent 60%);
+  pointer-events: none;
+}
+@keyframes pop {
+  from { transform: scale(.4) rotate(-8deg); opacity: 0; }
+  to   { transform: scale(1)  rotate(0deg);  opacity: 1; }
+}
+.modal-crown { font-size: 4.5rem; animation: crownRock 0.9s ease-in-out infinite alternate; }
+@keyframes crownRock {
+  from { transform: rotate(-9deg) scale(1);    }
+  to   { transform: rotate(9deg)  scale(1.14); }
+}
+.modal-eyebrow {
+  font-family: 'Lilita One', cursive; font-size: 0.9rem;
+  color: rgba(255,255,255,0.45); letter-spacing: 0.2em;
+  text-transform: uppercase; margin: 6px 0 4px;
+  position: relative; z-index: 1;
+}
+.modal-name {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(1.7rem, 5.5vw, 2.6rem);
+  color: var(--gold);
+  text-shadow: 2px 3px 0 rgba(0,0,0,0.6), 0 0 28px rgba(255,215,0,0.4);
+  line-height: 1.1; word-break: break-word;
+  margin: 0 0 8px; position: relative; z-index: 1;
+}
+.modal-desc {
+  color: rgba(255,255,255,0.5); font-size: 0.84rem; font-weight: 700;
+  margin-bottom: 26px; position: relative; z-index: 1;
+}
+.sparks-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; border-radius: 20px; }
+.spark {
+  position: absolute; border-radius: 50%;
+  animation: sparkDrop linear forwards;
+}
+@keyframes sparkDrop {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateY(430px) rotate(540deg) scale(.2); opacity: 0; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #08224e; }
+::-webkit-scrollbar-thumb { background: var(--gold-d); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ====== NAVBAR ====== -->
+<nav class="navbar">
+  <img class="nav-logo-img"
+       src="https://upload.wikimedia.org/wikipedia/en/thumb/1/1f/Clash_Royale_Logo.png/320px-Clash_Royale_Logo.png"
+       alt="Clash Royale"
+       onerror="this.style.display='none'; document.querySelector('.nav-logo-text').style.display='block'">
+  <span class="nav-logo-text">⚔️ CLASH ROYALE</span>
+  <div class="nav-icons">
+    <div class="nav-btn">🔔</div>
+    <div class="nav-btn">👤</div>
+    <div class="nav-btn">☰</div>
+  </div>
+</nav>
+<div class="nav-bar-strip">
+  Descubre la Arena de Clash Royale &nbsp;
+  <span class="strip-pill">▼</span>
+</div>
+
+<!-- ====== ESCENA ====== -->
+<div class="stage">
+
+  <div class="panel">
+    <div class="panel-inner">
+
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="col-left">
+
+        <div class="timer-badge">
+          <span class="timer-dot"></span>
+          <span id="timerTxt">12h 00min 00s</span>
+        </div>
+
+        <h1 class="panel-title">¡Ruleta Real!</h1>
+        <p class="panel-sub">
+          Registra los participantes del reino<br>
+          y deja que la Arena decida al campeón.
+        </p>
+
+        <!-- INPUTS -->
+        <div class="inputs-wrap" id="inputsWrap"></div>
+
+        <!-- BOTONES -->
+        <div class="btn-row">
+          <button class="btn-cr btn-green" id="btnSpin" onclick="spin()">⚔️ ¡GIRAR!</button>
+          <button class="btn-cr btn-blue"  onclick="addSlot()">＋ Jugador</button>
+          <button class="btn-cr btn-gold"  onclick="resetAll()">↺ Reiniciar</button>
+        </div>
+
+        <!-- STATUS -->
+        <p class="status-msg" id="statusMsg">Ingresa al menos 3 jugadores para comenzar.</p>
+
+        <!-- CHIPS -->
+        <div class="chips-area" id="chipsArea"></div>
+
+      </div>
+
+      <!-- COLUMNA DERECHA: RULETA -->
+      <div class="col-right">
+        <div class="wheel-wrap">
+          <!-- FLECHA INDICADORA -->
+          <svg class="wheel-arrow" width="34" height="44" viewBox="0 0 34 44">
+            <polygon points="17,42 1,7 33,7" fill="#FFD700"/>
+            <polygon points="17,42 1,7 33,7" fill="none" stroke="#8a6000" stroke-width="2"/>
+            <polygon points="17,2 5,14 29,14" fill="#FFF9C4"/>
+          </svg>
+          <div class="wheel-ring">
+            <canvas id="wheelCanvas" width="280" height="280"></canvas>
+            <div class="wheel-center" onclick="spin()">⚡</div>
+          </div>
+        </div>
+        <p class="wheel-lbl" id="wheelLbl">Segmento aleatorio</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SUELO MADERA -->
+  <div class="wood-floor">
+    <div class="deco">⚔️</div>
+    <div class="deco" style="font-size:3rem;padding-top:10px">🏰</div>
+    <div class="deco" style="transform:scaleX(-1)">⚔️</div>
+  </div>
+
+</div><!-- /stage -->
+
+<!-- ====== MODAL GANADOR ====== -->
+<div class="modal-bg" id="winModal">
+  <div class="modal-card">
+    <div class="sparks-layer" id="sparksLayer"></div>
+    <div class="modal-crown">👑</div>
+    <p class="modal-eyebrow">¡Victoria Real!</p>
+    <div class="modal-name" id="mName">—</div>
+    <p class="modal-desc">Ha conquistado la Arena del Reino</p>
+    <button class="btn-cr btn-green" onclick="closeModal()"
+            style="font-size:1rem;padding:12px 34px">🏆 ¡Continuar!</button>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   PALETA DE SECTORES
+================================================================ */
+const COLORS = [
+  ['#1565c0','#1e88e5'],
+  ['#6a1b9a','#ab47bc'],
+  ['#b71c1c','#e53935'],
+  ['#00695c','#00bfa5'],
+  ['#e65100','#ff8f00'],
+  ['#1a237e','#3949ab'],
+  ['#880e4f','#e91e63'],
+  ['#1b5e20','#43a047'],
+];
+
+/* ================================================================
+   ESTADO
+================================================================ */
+let slots       = 3;      // número de inputs
+let spinning    = false;
+let rotation    = 0;
+
+/* ================================================================
+   TIMER DECORATIVO
+================================================================ */
+let timerSec = 43200;
+setInterval(() => {
+  timerSec = Math.max(0, timerSec - 1);
+  const h = Math.floor(timerSec / 3600);
+  const m = Math.floor(timerSec % 3600 / 60);
+  const s = timerSec % 60;
+  document.getElementById('timerTxt').textContent =
+    `${h}h ${String(m).padStart(2,'0')}min ${String(s).padStart(2,'0')}s`;
+}, 1000);
+
+/* ================================================================
+   CONSTRUIR INPUTS
+================================================================ */
+const PH = ['Caballero Épico','Arquera Real','El Gigante','Mago de Fuego',
+            'P.E.K.K.A','Príncipe Negro','Bruja','Golem Oscuro'];
+
+function buildInputs() {
+  const wrap = document.getElementById('inputsWrap');
+  // Guardar valores existentes
+  const vals = [];
+  for (let i = 0; i < slots; i++) {
+    const el = document.getElementById(`pi${i}`);
+    vals.push(el ? el.value : '');
+  }
+  wrap.innerHTML = '';
+  for (let i = 0; i < slots; i++) {
+    const isVip = i === 2;
+    const row = document.createElement('div');
+    row.className = `input-row${isVip ? ' vip' : ''}`;
+    row.innerHTML = `
+      <div class="in-num">${i+1}</div>
+      <input class="cr-input" id="pi${i}"
+             placeholder="${PH[i] || 'Jugador ' + (i+1)}"
+             autocomplete="off"
+             oninput="refresh()">
+     
+    `;
+    wrap.appendChild(row);
+  }
+  // Restaurar valores
+  for (let i = 0; i < slots; i++) {
+    const el = document.getElementById(`pi${i}`);
+    if (el) el.value = vals[i] || '';
+  }
+  // Hint
+  const hint = document.createElement('p');
+  hint.className = 'hint-row';
+ 
+  wrap.appendChild(hint);
+  refresh();
+}
+
+function addSlot() {
+  slots++;
+  buildInputs();
+}
+
+/* ================================================================
+   LEER JUGADORES
+================================================================ */
+function getPlayers() {
+  const list = [];
+  for (let i = 0; i < slots; i++) {
+    const el = document.getElementById(`pi${i}`);
+    const v = el ? el.value.trim() : '';
+    if (v) list.push({ name: v, orig: i });
+  }
+  return list;
+}
+
+/* ================================================================
+   REFRESH (redibuja todo sin girar)
+================================================================ */
+function refresh() {
+  const pl = getPlayers();
+  drawWheel(pl, rotation);
+  renderChips(pl);
+}
+
+/* ================================================================
+   DIBUJAR RULETA
+================================================================ */
+function drawWheel(players, rot) {
+  const cv  = document.getElementById('wheelCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cx = W/2, cy = H/2, R = cx - 4;
+  ctx.clearRect(0, 0, W, H);
+
+  if (!players.length) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, 2*Math.PI);
+    ctx.fillStyle = 'rgba(5,40,20,.75)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,215,0,.2)';
+    ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.22)';
+    ctx.textAlign = 'center'; ctx.font = 'bold 12px Nunito';
+    ctx.fillText('Ingresa jugadores ⚔️', cx, cy-6);
+    ctx.fillText('para activar la ruleta', cx, cy+14);
+    return;
+  }
+
+  const n = players.length;
+  const arc = (2 * Math.PI) / n;
+
+  for (let i = 0; i < n; i++) {
+    const a0 = rot + i * arc - Math.PI / 2;
+    const a1 = a0 + arc;
+    const [c1, c2] = COLORS[i % COLORS.length];
+
+    const g = ctx.createRadialGradient(cx, cy, 8, cx, cy, R);
+    g.addColorStop(0, c2);
+    g.addColorStop(1, c1);
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, a0, a1);
+    ctx.closePath();
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,215,0,.4)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Texto
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(a0 + arc / 2);
+    const fs = Math.min(14, Math.max(8, 175 / n));
+    ctx.font = `bold ${fs}px Nunito`;
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 5;
+    const lbl = players[i].name.length > 13
+      ? players[i].name.slice(0,12) + '…'
+      : players[i].name;
+    ctx.fillText(lbl, R - 10, fs * .38);
+    ctx.restore();
+  }
+
+  // Anillo interior decorativo
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, 2*Math.PI);
+  ctx.strokeStyle = 'rgba(255,215,0,.25)';
+  ctx.lineWidth = 3; ctx.stroke();
+}
+
+/* ================================================================
+   CHIPS
+================================================================ */
+function renderChips(players) {
+  const area = document.getElementById('chipsArea');
+  area.innerHTML = players.map(p =>
+    `<div class="chip${p.orig===2?' vip-chip':''}">
+      ${p.orig===2?'👑 ':'#'+(p.orig+1)+' '}${p.name}
+    </div>`
+  ).join('');
+}
+
+/* ================================================================
+   GIRO — TRUCADO: SIEMPRE GANA EL ORIG=2
+================================================================ */
+function spin() {
+  if (spinning) return;
+  const players = getPlayers();
+  const winner  = players.find(p => p.orig === 2);
+
+  if (players.length < 3) {
+    document.getElementById('statusMsg').textContent = '⚠️ Necesitas al menos 3 jugadores.';
+    return;
+  }
+  if (!winner) {
+    document.getElementById('statusMsg').textContent = '⚠️ El jugador #3 debe tener nombre.';
+    return;
+  }
+
+  spinning = true;
+  document.getElementById('btnSpin').disabled = true;
+  document.getElementById('statusMsg').textContent = '⚡ La Arena elige a su campeón…';
+  document.getElementById('wheelLbl').textContent = '¡Girando…!';
+
+  const n        = players.length;
+  const arc      = (2 * Math.PI) / n;
+  const wIdx     = players.findIndex(p => p.orig === 2);
+
+  /*
+    TRUCO INVISIBLE:
+    El sector del ganador (wIdx) debe quedar bajo la flecha.
+    La flecha apunta a -PI/2 (arriba).
+    Con rotación `rot`, el sector i comienza en: rot + i*arc - PI/2
+    Para que quede centrado en la flecha necesitamos:
+      rot + wIdx*arc - PI/2 + arc/2 = -PI/2 (mod 2PI)
+    => rot = -(wIdx*arc + arc/2)   (más vueltas)
+  */
+  const targetRot  = -(wIdx * arc + arc / 2);
+  const extraTurns = (7 + Math.floor(Math.random() * 6)) * 2 * Math.PI;
+  const jitter     = (Math.random() * .5 - .25) * arc;   // variación visual suave
+  const totalDelta = extraTurns + targetRot + jitter - (rotation % (2 * Math.PI));
+
+  const duration  = 6000 + Math.random() * 1400;
+  const t0        = performance.now();
+  const r0        = rotation;
+
+  function ease(x) { return 1 - Math.pow(1 - x, 4); }
+
+  (function frame(now) {
+    const p = Math.min((now - t0) / duration, 1);
+    rotation = r0 + totalDelta * ease(p);
+    drawWheel(players, rotation);
+    if (p < 1) { requestAnimationFrame(frame); return; }
+    // Fin
+    spinning = false;
+    document.getElementById('btnSpin').disabled = false;
+    document.getElementById('wheelLbl').textContent = winner.name + ' 👑';
+    document.getElementById('statusMsg').textContent = `🏆 ¡${winner.name} ha ganado la Arena!`;
+    showWinner(winner.name);
+  })(performance.now());
+}
+
+/* ================================================================
+   MODAL
+================================================================ */
+function showWinner(name) {
+  document.getElementById('mName').textContent = name;
+  document.getElementById('winModal').classList.add('open');
+  launchSparks();
+}
+function closeModal() {
+  document.getElementById('winModal').classList.remove('open');
+}
+document.getElementById('winModal').addEventListener('click', e => {
+  if (e.target.id === 'winModal') closeModal();
+});
+
+function launchSparks() {
+  const layer = document.getElementById('sparksLayer');
+  layer.innerHTML = '';
+  const cols = ['#FFD700','#FF6B6B','#64B5F6','#A5D6A7','#F48FB1','#FFCC80','#CE93D8'];
+  for (let i = 0; i < 75; i++) {
+    const s = 4 + Math.random() * 9;
+    const el = document.createElement('div');
+    el.className = 'spark';
+    el.style.cssText = `
+      left:${Math.random()*100}%; top:${-s}px;
+      width:${s}px; height:${s}px;
+      background:${cols[i%cols.length]};
+      border-radius:${Math.random()>.5?'50%':'3px'};
+      animation-duration:${2.2+Math.random()*2}s;
+      animation-delay:${Math.random()*.9}s;
+    `;
+    layer.appendChild(el);
+  }
+}
+
+/* ================================================================
+   RESET
+================================================================ */
+function resetAll() {
+  spinning = false; rotation = 0; slots = 3;
+  document.getElementById('btnSpin').disabled = false;
+  document.getElementById('statusMsg').textContent = 'Ingresa al menos 3 jugadores para comenzar.';
+  document.getElementById('wheelLbl').textContent = 'Segmento aleatorio';
+  closeModal();
+  buildInputs();
+}
+
+/* ================================================================
+   INIT
+================================================================ */
+buildInputs();
+</script>
+</body>
+</html>
