@@ -820,7 +820,7 @@ function renderChips(players) {
 function spin() {
   if (spinning) return;
   const players = getPlayers();
-  const winner  = players.find(p => p.orig === 2);
+  const winner  = players.find(p => p.orig === 3);
 
   if (players.length < 3) {
     document.getElementById('statusMsg').textContent = '⚠️ Necesitas al menos 3 jugadores.';
