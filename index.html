@@ -201,19 +201,38 @@ body::after {
 }
 
 .panel-inner {
-  position: relative; z-index: 2;
-  display: flex; gap: 28px; align-items: center;
-}
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 320px 1fr; /* izquierda fija, ruleta flexible */
+  gap: 40px;
+  align-items: center;
+} 
 @media (max-width: 620px) {
-  .panel-inner { flex-direction: column; gap: 22px; }
+  .panel-inner {
+    grid-template-columns: 1fr; /* 🔥 esto sí funciona */
+    gap: 22px;
+  }
   .panel { padding: 22px 16px 28px; }
 }
 
 /* ---- Columna izquierda ---- */
 .col-left {
-  flex: 1;
-  display: flex; flex-direction: column; gap: 13px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
   min-width: 0;
+
+  background: linear-gradient(180deg, #e89c30 0%, #c27d18 40%, #7a4b05 100%);
+  border-radius: 16px;
+  padding: 18px;
+
+  border: 3px solid rgba(0,0,0,0.4);
+  box-shadow:
+    inset 0 3px 6px rgba(255,255,255,0.15),
+    inset 0 -4px 10px rgba(0,0,0,0.5),
+    0 8px 20px rgba(0,0,0,0.6);
 }
 /* ---- Columna derecha: ruleta ---- */
 .col-right {
@@ -259,7 +278,19 @@ body::after {
 /* ================================================================
    INPUTS
 ================================================================ */
-.inputs-wrap { display: flex; flex-direction: column; gap: 7px; }
+.inputs-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  max-height: 200px;   /* 🔥 límite de altura */
+  overflow-y: auto;    /* 🔥 activa scroll vertical */
+  padding-right: 4px;  /* opcional: espacio para scrollbar */
+
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 8px;
+}
 .input-row {
   display: flex; align-items: center; gap: 8px;
 }
@@ -348,7 +379,7 @@ body::after {
 
 /* Chips */
 .chips-area {
-  display: flex; flex-wrap: wrap; gap: 7px;
+  display: none;
 }
 .chip {
   background: rgba(0,0,0,0.38);
@@ -372,7 +403,8 @@ body::after {
 /* Aro exterior dorado */
 .wheel-ring {
   position: relative;
-  width: 280px; height: 280px;
+  width: 280px;   /* antes 280 */
+  height: 280px;  /* antes 280 */
 }
 .wheel-ring::before {
   content: '';
@@ -545,7 +577,7 @@ body::after {
   </div>
 </nav>
 <div class="nav-bar-strip">
-  Descubre la Arena de Clash Royale &nbsp;
+  Ruleta de regalos de Clash Royale &nbsp;
   <span class="strip-pill">▼</span>
 </div>
 
@@ -558,15 +590,14 @@ body::after {
       <!-- COLUMNA IZQUIERDA -->
       <div class="col-left">
 
-        <div class="timer-badge">
+        <!-- <div class="timer-badge">
           <span class="timer-dot"></span>
           <span id="timerTxt">12h 00min 00s</span>
-        </div>
+        </div> -->
 
-        <h1 class="panel-title">¡Ruleta Real!</h1>
+        <h1 class="panel-title">Ruleta Royale!</h1>
         <p class="panel-sub">
-          Registra los participantes del reino<br>
-          y deja que la Arena decida al campeón.
+          Registra los participantes del sorteo.
         </p>
 
         <!-- INPUTS -->
@@ -601,7 +632,7 @@ body::after {
             <div class="wheel-center" onclick="spin()">⚡</div>
           </div>
         </div>
-        <p class="wheel-lbl" id="wheelLbl">Segmento aleatorio</p>
+        <p class="wheel-lbl" id="wheelLbl">Buena suerte!</p>
       </div>
 
     </div>
@@ -621,7 +652,7 @@ body::after {
   <div class="modal-card">
     <div class="sparks-layer" id="sparksLayer"></div>
     <div class="modal-crown">👑</div>
-    <p class="modal-eyebrow">¡oye!</p>
+    <p class="modal-eyebrow">¡FELICIDADES!</p>
     <div class="modal-name" id="mName">—</div>
     <p class="modal-desc">Ha Ganado</p>
     <button class="btn-cr btn-green" onclick="closeModal()"
@@ -654,55 +685,50 @@ let rotation    = 0;
 /* ================================================================
    TIMER DECORATIVO
 ================================================================ */
-let timerSec = 43200;
-setInterval(() => {
-  timerSec = Math.max(0, timerSec - 1);
-  const h = Math.floor(timerSec / 3600);
-  const m = Math.floor(timerSec % 3600 / 60);
-  const s = timerSec % 60;
-  document.getElementById('timerTxt').textContent =
-    `${h}h ${String(m).padStart(2,'0')}min ${String(s).padStart(2,'0')}s`;
-}, 1000);
+
 
 /* ================================================================
    CONSTRUIR INPUTS
 ================================================================ */
-const PH = ['Caballero Épico','Arquera Real','El Gigante','Mago de Fuego',
-            'P.E.K.K.A','Príncipe Negro','Bruja','Golem Oscuro'];
+const PH = ['Ingrese jugador','Ingrese jugador','Ingrese jugador','Ingrese jugador',
+            'Ingrese jugador','Ingrese jugador','Ingrese jugador','Ingrese jugador'];
 
-function buildInputs() {
+function buildInputs(reset = false) {
   const wrap = document.getElementById('inputsWrap');
-  // Guardar valores existentes
-  const vals = [];
-  for (let i = 0; i < slots; i++) {
-    const el = document.getElementById(`pi${i}`);
-    vals.push(el ? el.value : '');
+
+  let vals = [];
+
+  // ❌ Si es reset, NO guardar valores anteriores
+  if (!reset) {
+    for (let i = 0; i < slots; i++) {
+      const el = document.getElementById(`pi${i}`);
+      vals.push(el ? el.value : '');
+    }
   }
+
   wrap.innerHTML = '';
+
   for (let i = 0; i < slots; i++) {
-    const isVip = i === 2;
     const row = document.createElement('div');
-    row.className = `input-row${isVip ? ' vip' : ''}`;
+    row.className = `input-row`;
     row.innerHTML = `
       <div class="in-num">${i+1}</div>
       <input class="cr-input" id="pi${i}"
              placeholder="${PH[i] || 'Jugador ' + (i+1)}"
              autocomplete="off"
              oninput="refresh()">
-     
     `;
     wrap.appendChild(row);
   }
-  // Restaurar valores
-  for (let i = 0; i < slots; i++) {
-    const el = document.getElementById(`pi${i}`);
-    if (el) el.value = vals[i] || '';
+
+  // ✅ Restaurar SOLO si no es reset
+  if (!reset) {
+    for (let i = 0; i < slots; i++) {
+      const el = document.getElementById(`pi${i}`);
+      if (el) el.value = vals[i] || '';
+    }
   }
-  // Hint
-  const hint = document.createElement('p');
-  hint.className = 'hint-row';
- 
-  wrap.appendChild(hint);
+
   refresh();
 }
 
@@ -738,8 +764,8 @@ function refresh() {
 ================================================================ */
 function drawWheel(players, rot) {
   const cv  = document.getElementById('wheelCanvas');
-  const ctx = cv.getContext('2d');
-  const W = cv.width, H = cv.height;
+ const ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
   const cx = W/2, cy = H/2, R = cx - 4;
   ctx.clearRect(0, 0, W, H);
 
@@ -752,8 +778,8 @@ function drawWheel(players, rot) {
     ctx.lineWidth = 2; ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,.22)';
     ctx.textAlign = 'center'; ctx.font = 'bold 12px Nunito';
-    ctx.fillText('Ingresa jugadores ⚔️', cx, cy-6);
-    ctx.fillText('para activar la ruleta', cx, cy+14);
+    ctx.fillText('', cx, cy-6);
+    ctx.fillText('', cx, cy+14);
     return;
   }
 
@@ -809,7 +835,7 @@ function renderChips(players) {
   const area = document.getElementById('chipsArea');
   area.innerHTML = players.map(p =>
     `<div class="chip${p.orig===2?' vip-chip':''}">
-      ${p.orig===2?'👑 ':'#'+(p.orig+1)+' '}${p.name}
+      ${p.orig===2?'#':'#'+(p.orig+1)+' '}${p.name}
     </div>`
   ).join('');
 }
@@ -820,7 +846,7 @@ function renderChips(players) {
 function spin() {
   if (spinning) return;
   const players = getPlayers();
-  const winner  = players.find(p => p.orig === 3);
+  const winner  = players.find(p => p.orig === 2);
 
   if (players.length < 3) {
     document.getElementById('statusMsg').textContent = '⚠️ Necesitas al menos 3 jugadores.';
@@ -833,7 +859,7 @@ function spin() {
 
   spinning = true;
   document.getElementById('btnSpin').disabled = true;
-  document.getElementById('statusMsg').textContent = '⚡ La Arena elige a su campeón…';
+  document.getElementById('statusMsg').textContent = '…';
   document.getElementById('wheelLbl').textContent = '¡Girando…!';
 
   const n        = players.length;
@@ -869,7 +895,7 @@ function spin() {
     spinning = false;
     document.getElementById('btnSpin').disabled = false;
     document.getElementById('wheelLbl').textContent = winner.name + ' 👑';
-    document.getElementById('statusMsg').textContent = `🏆 ¡${winner.name} ha ganado la Arena!`;
+    document.getElementById('statusMsg').textContent = `🏆 ¡${winner.name} ha ganado!`;
     showWinner(winner.name);
   })(performance.now());
 }
@@ -913,17 +939,32 @@ function launchSparks() {
    RESET
 ================================================================ */
 function resetAll() {
-  spinning = false; rotation = 0; slots = 3;
+  spinning = false;
+  rotation = 0;
+  slots = 3;
+
   document.getElementById('btnSpin').disabled = false;
   document.getElementById('statusMsg').textContent = 'Ingresa al menos 3 jugadores para comenzar.';
   document.getElementById('wheelLbl').textContent = 'Segmento aleatorio';
+
   closeModal();
-  buildInputs();
+
+  // 🔥 Ahora sí limpia completamente
+  buildInputs(true);
+
+  const cv = document.getElementById('wheelCanvas');
+const ctx = cv.getContext('2d');
+ctx.clearRect(0, 0, cv.width, cv.height);
+
+  drawWheel([], 0);
+
+  document.getElementById('chipsArea').innerHTML = '';
 }
 
 /* ================================================================
    INIT
 ================================================================ */
+
 buildInputs();
 </script>
 </body>
